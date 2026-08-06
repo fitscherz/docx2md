@@ -1,6 +1,7 @@
 package com.de.sookie.docx2md.reader
 
 import com.de.sookie.docx2md.model.Block
+import com.de.sookie.docx2md.model.CodeBlock
 import com.de.sookie.docx2md.model.ListItem
 import com.de.sookie.docx2md.model.Paragraph
 
@@ -37,7 +38,7 @@ class ListStructureBuilder {
                 return
             }
 
-            if (block instanceof com.de.sookie.docx2md.model.CodeBlock &&
+            if (block instanceof CodeBlock &&
                     block.listId &&
                     !stack.isEmpty()) {
                 stack.last().add(block)
