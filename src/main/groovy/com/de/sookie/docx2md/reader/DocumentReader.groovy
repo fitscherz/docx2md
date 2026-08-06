@@ -3,6 +3,7 @@ package com.de.sookie.docx2md.reader
 import com.de.sookie.docx2md.model.Block
 import com.de.sookie.docx2md.model.Document
 import com.de.sookie.docx2md.model.Paragraph
+import com.de.sookie.docx2md.model.inline.Text
 import org.docx4j.XmlUtils
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage
 
@@ -39,15 +40,17 @@ class DocumentReader {
             }
         }
 
-        /*println "BEFORE NORMALIZER"
+        println "=== BEFORE NORMALIZER ==="
+        document.blocks.eachWithIndex { block, index ->
+            println "${index}: ${block.class.simpleName}"
 
-        document.blocks.each {
-            if (it instanceof com.de.sookie.docx2md.model.Paragraph) {
-                println "P type=${it.type} listId=${it.listId} level=${it.listLevel}"
-            } else {
-                println it.class.simpleName
+            if (block instanceof Paragraph) {
+                println "    listId=${block.listId} level=${block.listLevel}"
+                block.inlines.each {
+                    println "       ${it.class.simpleName}: ${it instanceof Text ? it.value : ''}"
+                }
             }
-        }*/
+        }
 
         listNormalizer.normalize(document.blocks)
 
