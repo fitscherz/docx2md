@@ -51,7 +51,8 @@ class CodeMarkerAnalyzer {
             result << paragraph
         }
 
-        CodeBlock codeBlock = new CodeBlock(language: language)
+        CodeBlock codeBlock = new CodeBlock()
+        codeBlock.language = language
         codeBlock.listId = block.listId
         codeBlock.listLevel = block.listLevel
         codeBlock.type = block.type

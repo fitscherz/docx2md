@@ -3,6 +3,7 @@ package com.de.sookie.docx2md.renderer.block
 import com.de.sookie.docx2md.model.CodeBlock
 import com.de.sookie.docx2md.model.ListItem
 import com.de.sookie.docx2md.model.Paragraph
+import com.de.sookie.docx2md.model.inline.LineBreak
 import com.de.sookie.docx2md.renderer.inline.InlineRendererService
 
 class ListItemRenderer implements BlockRenderer<ListItem> {
@@ -45,7 +46,13 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
                 }
 
                 child.inlines.each { inline ->
-                    inlineRendererService.render(md, inline)
+                    if (inline instanceof LineBreak) {
+                        md.append("\n")
+                        md.append(indent)
+                        md.append("  ")
+                    } else {
+                        inlineRendererService.render(md, inline)
+                    }
                 }
 
                 md.append("\n")
