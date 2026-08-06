@@ -14,7 +14,6 @@ class ListStructureBuilder {
         blocks.each { block ->
 
             if (block instanceof Paragraph && block.listId) {
-
                 while (!stack.isEmpty() &&
                         (stack.last().listId != block.listId ||
                                 stack.last().level >= block.listLevel)) {
@@ -40,6 +39,13 @@ class ListStructureBuilder {
 
             if (block instanceof CodeBlock &&
                     block.listId &&
+                    !stack.isEmpty()) {
+                stack.last().add(block)
+                return
+            }
+
+            if (block instanceof Paragraph &&
+                    !block.listId &&
                     !stack.isEmpty()) {
                 stack.last().add(block)
                 return
