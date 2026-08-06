@@ -30,7 +30,6 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
 
     private void renderItem(StringBuilder md, ListItem item, int depth) {
         String indent = "    " * depth
-
         boolean firstParagraph = true
 
         item.children.each { child ->
@@ -59,9 +58,6 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
                 return
             }
 
-            // CodeBlock oder andere Blocktypen innerhalb eines Listenpunktes
-            md.append("\n")
-
             StringBuilder blockMd = new StringBuilder()
             blockRendererService.render(blockMd, child)
 
@@ -71,8 +67,6 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
                 md.append(line)
                 md.append("\n")
             }
-
-            md.append("\n")
         }
 
         if (depth == 0) {
