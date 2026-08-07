@@ -14,45 +14,83 @@ class ListStructureBuilder {
         blocks.each { block ->
 
             if (block instanceof Paragraph && block.listId) {
-                while (!stack.isEmpty() &&
-                        (stack.last().listId != block.listId ||
-                                stack.last().level >= block.listLevel)) {
-                    stack.remove(stack.size() - 1)
-                }
+                handleParagraph(block, result, stack)
+                return
+            }
 
-                ListItem item = new ListItem(
-                        listId: block.listId,
-                        level: block.listLevel
-                )
-
-                item.add(block)
-
-                if (stack.isEmpty()) {
-                    result.add(item)
+            if (block instanceof CodeBlock && block.listId) {
+                if (!stack.isEmpty()) {
+                    stack.last().add(block)
                 } else {
-                    stack.last().add(item)
+                    result << block
                 }
-
-                stack.add(item)
-                return
-            }
-
-            if (block instanceof CodeBlock &&
-                    block.listId &&
-                    !stack.isEmpty()) {
-                stack.last().add(block)
-                return
-            }
-
-            if ((block instanceof Paragraph || block instanceof CodeBlock) && !block.listId && !stack.isEmpty()) {
-                stack.last().add(block)
                 return
             }
 
             stack.clear()
-            result.add(block)
+            result << block
         }
 
         return result
+    }
+
+    private void handleParagraph(
+            Paragraph paragraph,
+            List<Block> result,
+            List<ListItem> stack
+    ) {
+        if (stack.isEmpty()) {
+            createListItem(paragraph, result, stack)
+            return
+        }
+
+        ListItem current = stack.last()
+
+        if (current.listId != paragraph.listId) {
+            stack.clear()
+            createListItem(paragraph, result, stack)
+            return
+        }
+
+        if (current.level < paragraph.listLevel) {
+            ListItem child = new ListItem()
+            child.listId = paragraph.listId
+            child.level = paragraph.listLevel
+            child.add(paragraph)
+            current.add(child)
+            stack.add(child)
+            return
+        }
+
+        if (current.level == paragraph.listLevel) {
+            createListItem(paragraph, result, stack)
+            return
+        }
+
+        while (!stack.isEmpty() &&
+                stack.last().level >= paragraph.listLevel) {
+            stack.remove(stack.size() - 1)
+        }
+
+        createListItem(paragraph, result, stack)
+    }
+
+    private void createListItem(
+            Paragraph paragraph,
+            List<Block> result,
+            List<ListItem> stack
+    ) {
+        ListItem item = new ListItem()
+        item.listId = paragraph.listId
+        item.level = paragraph.listLevel
+        item.add(paragraph)
+
+        if (stack.isEmpty()) {
+            result << item
+        } else {
+            stack.last().add(item)
+        }
+
+        stack.add(item)
     }
 }
