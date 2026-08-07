@@ -60,10 +60,14 @@ class DocumentReader {
             println "${index}: ${block.class.simpleName}"
 
             if (block instanceof Paragraph) {
-                println "listId=${block.listId} level=${block.listLevel}"
+                println "Paragraph properties: ${block.properties}"
 
                 block.inlines.each { inline ->
-                    println "  ${inline.class.simpleName}: ${inline}"
+                    if (inline instanceof Text) {
+                        println "  Text: '${inline.value}'"
+                    } else {
+                        println "  ${inline.class.simpleName}: ${inline}"
+                    }
                 }
             }
 
