@@ -51,11 +51,26 @@ class ParagraphReader implements BlockReader<P> {
 
         println "=== BEFORE CODEMARKER CONTENT ==="
         block.inlines.each {
-            println "${it.class.simpleName}: '${it instanceof Text ? it.value.replace("\n","\\n") : it}'"
+            //println "${it.class.simpleName}: '${it instanceof Text ? it.value.replace("\n","\\n") : it}'"
+            println "${it.class.simpleName}: ${it.properties}"
         }
         println "================================="
 
         List<Block> marked = codeMarkerAnalyzer.analyze(block)
+
+        println "=== AFTER CODEMARKER ==="
+
+        marked.each { b ->
+            println "${b.class.simpleName}"
+
+            if (b instanceof Paragraph) {
+                b.inlines.each {
+                    println "  ${it.class.simpleName}: ${it.properties}"
+                }
+            }
+        }
+
+        println "========================="
 
         marked.each { current ->
             if (current instanceof Paragraph) {

@@ -41,6 +41,24 @@ class DocumentReader {
             }
         }
 
+        println "=== AFTER PARAGRAPH READER ==="
+
+        document.blocks.eachWithIndex { block, index ->
+            println "${index}: ${block.class.simpleName}"
+
+            if (block instanceof Paragraph) {
+                println "type=${block.type} listId=${block.listId} level=${block.listLevel}"
+
+                block.inlines.each { inline ->
+                    if (inline instanceof Text) {
+                        println "  Text: '${inline.value}'"
+                    } else {
+                        println "  ${inline.class.simpleName}: ${inline}"
+                    }
+                }
+            }
+        }
+
         println "=== BEFORE NORMALIZER ==="
         document.blocks.eachWithIndex { block, index ->
             println "${index}: ${block.class.simpleName}"

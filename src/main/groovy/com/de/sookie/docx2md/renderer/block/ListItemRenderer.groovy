@@ -78,11 +78,15 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
             md.append("  ")
         }
 
+        boolean afterLineBreak = false
+
         paragraph.inlines.each { inline ->
             if (inline instanceof LineBreak) {
                 md.append("\n")
+                md.append("\n")
                 md.append(indent)
                 md.append("  ")
+                afterLineBreak = true
             } else {
                 inlineRendererService.render(md, inline)
             }
