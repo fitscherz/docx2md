@@ -61,15 +61,7 @@ class ParagraphReader implements BlockReader<P> {
             if (current instanceof Paragraph) {
                 List<Block> analyzed = codeBlockAnalyzer.analyze(current)
 
-                if (current instanceof Paragraph && current.listId && analyzed.size() > 1) {
-                    current.inlines.clear()
-                    analyzed.findAll { it instanceof CodeBlock }
-                            .each { current.add(it) }
-
-                    result << current
-                } else {
-                    result.addAll(analyzed)
-                }
+                result.addAll(analyzed)
             } else {
                 result << current
             }
