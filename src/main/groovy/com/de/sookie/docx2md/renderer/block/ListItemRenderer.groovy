@@ -1,8 +1,8 @@
 package com.de.sookie.docx2md.renderer.block
 
-import com.de.sookie.docx2md.model.CodeBlock
 import com.de.sookie.docx2md.model.ListItem
 import com.de.sookie.docx2md.model.Paragraph
+import com.de.sookie.docx2md.model.CodeBlock
 import com.de.sookie.docx2md.model.inline.LineBreak
 import com.de.sookie.docx2md.renderer.inline.InlineRendererService
 
@@ -36,26 +36,13 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
         item.children.each { child ->
 
             if (child instanceof Paragraph) {
-                if (firstParagraph) {
-                    md.append(indent)
-                    md.append("- ")
-                    firstParagraph = false
-                } else {
-                    md.append(indent)
-                    md.append("  ")
-                }
+                renderParagraph(md, child, indent, firstParagraph)
+                firstParagraph = false
+                return
+            }
 
-                child.inlines.each { inline ->
-                    if (inline instanceof LineBreak) {
-                        md.append("\n")
-                        md.append(indent)
-                        md.append("  ")
-                    } else {
-                        inlineRendererService.render(md, inline)
-                    }
-                }
-
-                md.append("\n")
+            if (child instanceof CodeBlock) {
+                renderCodeBlock(md, child, indent)
                 return
             }
 
@@ -65,18 +52,75 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
                 return
             }
 
-            StringBuilder blockMd = new StringBuilder()
-            blockRendererService.render(blockMd, child)
-
-            blockMd.eachLine { line ->
-                md.append(indent)
-                md.append("    ")
-                md.append(line)
-                md.append("\n")
-            }
+            renderBlock(md, child, indent)
         }
 
         if (depth == 0) {
+            md.append("\n")
+        }
+    }
+
+    private void renderParagraph(
+            StringBuilder md,
+            Paragraph paragraph,
+            String indent,
+            boolean first
+    ) {
+        if (first) {
+            md.append(indent)
+            md.append("- ")
+        } else {
+            md.append("\n")
+            md.append(indent)
+            md.append("  ")
+            md.append("\n")
+            md.append(indent)
+            md.append("  ")
+        }
+
+        paragraph.inlines.each { inline ->
+            if (inline instanceof LineBreak) {
+                md.append("\n")
+                md.append(indent)
+                md.append("  ")
+            } else {
+                inlineRendererService.render(md, inline)
+            }
+        }
+
+        md.append("\n")
+    }
+
+    private void renderCodeBlock(
+            StringBuilder md,
+            CodeBlock block,
+            String indent
+    ) {
+        md.append("\n")
+
+        StringBuilder blockMd = new StringBuilder()
+        blockRendererService.render(blockMd, block)
+
+        blockMd.eachLine { line ->
+            md.append(indent)
+            md.append("  ")
+            md.append(line)
+            md.append("\n")
+        }
+    }
+
+    private void renderBlock(
+            StringBuilder md,
+            Object block,
+            String indent
+    ) {
+        StringBuilder blockMd = new StringBuilder()
+        blockRendererService.render(blockMd, block)
+
+        blockMd.eachLine { line ->
+            md.append(indent)
+            md.append("  ")
+            md.append(line)
             md.append("\n")
         }
     }
