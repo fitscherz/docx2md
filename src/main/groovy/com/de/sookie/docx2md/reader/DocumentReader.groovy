@@ -14,12 +14,14 @@ class DocumentReader {
     private final ParagraphAnalyzer paragraphAnalyzer
     private final ListNormalizer listNormalizer
     private final ListStructureBuilder listStructureBuilder
+    private final DocumentCodeMarkerAnalyzer documentCodeMarkerAnalyzer
 
-    DocumentReader(BlockReaderService blockReaderService, ParagraphAnalyzer paragraphAnalyzer, ListNormalizer listNormalizer, ListStructureBuilder listStructureBuilder) {
+    DocumentReader(BlockReaderService blockReaderService, ParagraphAnalyzer paragraphAnalyzer, ListNormalizer listNormalizer, ListStructureBuilder listStructureBuilder, DocumentCodeMarkerAnalyzer documentCodeMarkerAnalyzer) {
         this.blockReaderService = blockReaderService
         this.paragraphAnalyzer = paragraphAnalyzer
         this.listNormalizer = listNormalizer
         this.listStructureBuilder = listStructureBuilder
+        this.documentCodeMarkerAnalyzer = documentCodeMarkerAnalyzer
     }
 
     Document read(File file) {
@@ -40,6 +42,8 @@ class DocumentReader {
                 document.add(block)
             }
         }
+
+        documentCodeMarkerAnalyzer.analyze(document.blocks)
 
         println "=== AFTER PARAGRAPH READER ==="
 

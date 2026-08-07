@@ -6,7 +6,8 @@ class Main {
         def reader = Docx2MdFactory.createDocumentReader()
         def renderer = Docx2MdFactory.createMarkdownRenderer()
 
-        def document = reader.read(new File("/Users/sookie/Dokumente local/dcx_zu_md/docxTest.docx"))
+        def document = reader.read(new File("/Users/sookie/Dokumente local/dcx_zu_md/webMethods_Migration_Pharmlog_10_zu_11.docx"))
+        //def document = reader.read(new File("/Users/sookie/Dokumente local/dcx_zu_md/docxTest.docx"))
         String markdown = renderer.render(document)
 
         new File("/Users/sookie/Develop/Projekte/Pharmlog/GroovyTests/src/main/resources/docx2md/output/document.md").text = markdown

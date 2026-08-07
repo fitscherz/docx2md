@@ -3,6 +3,7 @@ package com.de.sookie.docx2md
 import com.de.sookie.docx2md.reader.BlockReaderService
 import com.de.sookie.docx2md.reader.CodeBlockAnalyzer
 import com.de.sookie.docx2md.reader.CodeMarkerAnalyzer
+import com.de.sookie.docx2md.reader.DocumentCodeMarkerAnalyzer
 import com.de.sookie.docx2md.reader.DocumentReader
 import com.de.sookie.docx2md.reader.InlineNormalizer
 import com.de.sookie.docx2md.reader.InlineReaderService
@@ -80,7 +81,10 @@ class Docx2MdFactory {
         ListNormalizer listNormalizer = new ListNormalizer()
         ListStructureBuilder listStructureBuilder = new ListStructureBuilder()
 
-        return new DocumentReader(blockReaderService, paragraphAnalyzer, listNormalizer, listStructureBuilder)
+        DocumentCodeMarkerAnalyzer documentCodeMarkerAnalyzer =
+                new DocumentCodeMarkerAnalyzer()
+
+        return new DocumentReader(blockReaderService, paragraphAnalyzer, listNormalizer, listStructureBuilder, documentCodeMarkerAnalyzer)
     }
 
     static MarkdownRenderer createMarkdownRenderer() {

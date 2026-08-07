@@ -55,9 +55,9 @@ class TableReader implements BlockReader<Tbl> {
         TableCell result = new TableCell()
 
         cell.content.each {
-            Block block = blockReaderService.read(XmlUtils.unwrap(it))
+            List<Block> blocks = blockReaderService.read(XmlUtils.unwrap(it))
 
-            if (block != null) {
+            blocks.each { block ->
                 result.add(block)
             }
         }
