@@ -44,9 +44,7 @@ class ListStructureBuilder {
                 return
             }
 
-            if (block instanceof Paragraph &&
-                    !block.listId &&
-                    !stack.isEmpty()) {
+            if (!block.listId && !stack.isEmpty()) {
                 stack.last().add(block)
                 return
             }
