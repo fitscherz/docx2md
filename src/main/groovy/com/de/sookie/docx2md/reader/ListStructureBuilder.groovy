@@ -31,7 +31,7 @@ class ListStructureBuilder {
                 return
             }
 
-            if (block instanceof CodeBlock && block.listId) {
+            if (block instanceof CodeBlock) {
                 if (!stack.isEmpty()) {
                     stack.last().add(block)
                 } else {

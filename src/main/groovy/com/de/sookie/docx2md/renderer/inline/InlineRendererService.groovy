@@ -4,7 +4,7 @@ import com.de.sookie.docx2md.model.inline.Inline
 
 class InlineRendererService {
 
-    private final List<InlineRenderer<?>> renderers
+    final List<InlineRenderer<?>> renderers
 
     InlineRendererService(List<InlineRenderer<?>> renderers) {
         this.renderers = renderers

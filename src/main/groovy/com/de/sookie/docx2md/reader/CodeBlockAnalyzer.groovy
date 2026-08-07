@@ -7,6 +7,9 @@ import com.de.sookie.docx2md.model.inline.Inline
 import com.de.sookie.docx2md.model.inline.LineBreak
 import com.de.sookie.docx2md.model.inline.Text
 
+/**
+ * Automatische Code-Erkennung über Font
+ */
 class CodeBlockAnalyzer {
 
     List<Block> analyze(Block block) {

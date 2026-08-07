@@ -1,6 +1,7 @@
 package com.de.sookie.docx2md.reader
 
 import com.de.sookie.docx2md.model.inline.Inline
+import com.de.sookie.docx2md.model.inline.InlineCode
 import com.de.sookie.docx2md.model.inline.Text
 
 class InlineNormalizer {
@@ -8,19 +9,34 @@ class InlineNormalizer {
     List<Inline> normalize(List<Inline> source) {
         List<Inline> result = []
         Text buffer = null
+        InlineCode codeBuffer = null
 
         source.each { inline ->
+
             if (!(inline instanceof Text)) {
+                flushCode(result, codeBuffer)
+                codeBuffer = null
                 result << inline
                 buffer = null
                 return
             }
 
             if (inline.code) {
-                result << inline
+                if (!codeBuffer) {
+                    codeBuffer = new InlineCode()
+                }
+
+                codeBuffer.add(new Text(
+                        value: inline.value,
+                        fontFamily: inline.fontFamily
+                ))
+
                 buffer = null
                 return
             }
+
+            flushCode(result, codeBuffer)
+            codeBuffer = null
 
             if (buffer &&
                     buffer.bold == inline.bold &&
@@ -35,36 +51,14 @@ class InlineNormalizer {
             }
         }
 
-        return mergeCode(result)
+        flushCode(result, codeBuffer)
+
+        return result
     }
 
-    private List<Inline> mergeCode(List<Inline> inlines) {
-        List<Inline> result = []
-        Text current = null
-
-        inlines.each { inline ->
-            if (inline instanceof Text && inline.code) {
-                if (current) {
-                    current.value += inline.value
-                } else {
-                    current = new Text(
-                            value: inline.value,
-                            code: true
-                    )
-                }
-            } else {
-                if (current) {
-                    result << current
-                    current = null
-                }
-                result << inline
-            }
+    private void flushCode(List<Inline> result, InlineCode codeBuffer) {
+        if (codeBuffer) {
+            result << codeBuffer
         }
-
-        if (current) {
-            result << current
-        }
-
-        result
     }
 }

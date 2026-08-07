@@ -13,21 +13,15 @@ class ParagraphReader implements BlockReader<P> {
 
     private final InlineReaderService inlineReaderService
     private final ParagraphAnalyzer paragraphAnalyzer
-    private final CodeMarkerAnalyzer codeMarkerAnalyzer
-    private final CodeBlockAnalyzer codeBlockAnalyzer
     private final InlineNormalizer inlineNormalizer
 
     ParagraphReader(
             InlineReaderService inlineReaderService,
             ParagraphAnalyzer paragraphAnalyzer,
-            CodeMarkerAnalyzer codeMarkerAnalyzer,
-            CodeBlockAnalyzer codeBlockAnalyzer,
             InlineNormalizer inlineNormalizer
     ) {
         this.inlineReaderService = inlineReaderService
         this.paragraphAnalyzer = paragraphAnalyzer
-        this.codeMarkerAnalyzer = codeMarkerAnalyzer
-        this.codeBlockAnalyzer = codeBlockAnalyzer
         this.inlineNormalizer = inlineNormalizer
     }
 
@@ -47,42 +41,7 @@ class ParagraphReader implements BlockReader<P> {
         block.inlines.clear()
         block.inlines.addAll(normalized)
 
-        List<Block> result = []
-
-        println "=== BEFORE CODEMARKER CONTENT ==="
-        block.inlines.each {
-            //println "${it.class.simpleName}: '${it instanceof Text ? it.value.replace("\n","\\n") : it}'"
-            println "${it.class.simpleName}: ${it.properties}"
-        }
-        println "================================="
-
-        List<Block> marked = codeMarkerAnalyzer.analyze(block)
-
-        println "=== AFTER CODEMARKER ==="
-
-        marked.each { b ->
-            println "${b.class.simpleName}"
-
-            if (b instanceof Paragraph) {
-                b.inlines.each {
-                    println "  ${it.class.simpleName}: ${it.properties}"
-                }
-            }
-        }
-
-        println "========================="
-
-        marked.each { current ->
-            if (current instanceof Paragraph) {
-                List<Block> analyzed = codeBlockAnalyzer.analyze(current)
-
-                result.addAll(analyzed)
-            } else {
-                result << current
-            }
-        }
-
-        return result
+        return [block]
     }
 
     private void readContent(ContentAccessor parent, InlineBlock block) {

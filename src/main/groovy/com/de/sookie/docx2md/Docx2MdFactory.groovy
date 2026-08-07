@@ -3,8 +3,10 @@ package com.de.sookie.docx2md
 import com.de.sookie.docx2md.reader.BlockReaderService
 import com.de.sookie.docx2md.reader.CodeBlockAnalyzer
 import com.de.sookie.docx2md.reader.CodeMarkerAnalyzer
+import com.de.sookie.docx2md.reader.CustomCodeAnalyzer
 import com.de.sookie.docx2md.reader.DocumentCodeMarkerAnalyzer
 import com.de.sookie.docx2md.reader.DocumentReader
+import com.de.sookie.docx2md.reader.FontCodeAnalyzer
 import com.de.sookie.docx2md.reader.InlineNormalizer
 import com.de.sookie.docx2md.reader.InlineReaderService
 import com.de.sookie.docx2md.reader.ListNormalizer
@@ -23,6 +25,7 @@ import com.de.sookie.docx2md.renderer.block.CodeBlockRenderer
 import com.de.sookie.docx2md.renderer.block.HeadingRenderer
 import com.de.sookie.docx2md.renderer.block.ListItemRenderer
 import com.de.sookie.docx2md.renderer.block.ParagraphRenderer
+import com.de.sookie.docx2md.renderer.inline.InlineCodeRenderer
 import com.de.sookie.docx2md.renderer.inline.InlineRendererService
 import com.de.sookie.docx2md.renderer.inline.LineBreakRenderer
 import com.de.sookie.docx2md.renderer.inline.TabStopRenderer
@@ -49,20 +52,22 @@ class Docx2MdFactory {
         ParagraphAnalyzer paragraphAnalyzer =
                 new ParagraphAnalyzer()
 
-        CodeMarkerAnalyzer codeMarkerAnalyzer =
-                new CodeMarkerAnalyzer()
+        //CodeMarkerAnalyzer codeMarkerAnalyzer = new CodeMarkerAnalyzer()
 
         InlineNormalizer inlineNormalizer = new InlineNormalizer()
-        CodeBlockAnalyzer codeBlockAnalyzer = new CodeBlockAnalyzer()
+        //CodeBlockAnalyzer codeBlockAnalyzer = new CodeBlockAnalyzer()
 
         ParagraphReader paragraphReader =
                 new ParagraphReader(
                         inlineReaderService,
                         paragraphAnalyzer,
-                        codeMarkerAnalyzer,
-                        codeBlockAnalyzer,
+                        //codeMarkerAnalyzer,
+                        //codeBlockAnalyzer,
                         inlineNormalizer
                 )
+
+        CustomCodeAnalyzer customCodeAnalyzer = new CustomCodeAnalyzer()
+        FontCodeAnalyzer fontCodeAnalyzer = new FontCodeAnalyzer()
 
         BlockReaderService blockReaderService =
                 new BlockReaderService([
@@ -81,19 +86,19 @@ class Docx2MdFactory {
         ListNormalizer listNormalizer = new ListNormalizer()
         ListStructureBuilder listStructureBuilder = new ListStructureBuilder()
 
-        DocumentCodeMarkerAnalyzer documentCodeMarkerAnalyzer =
-                new DocumentCodeMarkerAnalyzer()
-
-        return new DocumentReader(blockReaderService, paragraphAnalyzer, listNormalizer, listStructureBuilder, documentCodeMarkerAnalyzer)
+        return new DocumentReader(blockReaderService, paragraphAnalyzer, listNormalizer, listStructureBuilder, customCodeAnalyzer, fontCodeAnalyzer)
     }
 
     static MarkdownRenderer createMarkdownRenderer() {
         InlineRendererService inlineRendererService =
-                new InlineRendererService([
-                        new TextRenderer(),
-                        new LineBreakRenderer(),
-                        new TabStopRenderer()
-                ])
+                new InlineRendererService([])
+
+        inlineRendererService.renderers.addAll([
+                new TextRenderer(),
+                new InlineCodeRenderer(inlineRendererService),
+                new LineBreakRenderer(),
+                new TabStopRenderer()
+        ])
 
         List renderers = []
 
