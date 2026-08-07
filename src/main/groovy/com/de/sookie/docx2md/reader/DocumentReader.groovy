@@ -54,6 +54,24 @@ class DocumentReader {
         }
 
         listNormalizer.normalize(document.blocks)
+        println "=== AFTER NORMALIZER ==="
+
+        document.blocks.eachWithIndex { block, index ->
+            println "${index}: ${block.class.simpleName}"
+
+            if (block instanceof Paragraph) {
+                println "listId=${block.listId} level=${block.listLevel}"
+
+                block.inlines.each { inline ->
+                    println "  ${inline.class.simpleName}: ${inline}"
+                }
+            }
+
+            if (block instanceof CodeBlock) {
+                println "listId=${block.listId} level=${block.listLevel}"
+                println "  code=${block}"
+            }
+        }
 
         println "=== BEFORE LIST BUILDER ==="
         document.blocks.eachWithIndex { block, index ->
