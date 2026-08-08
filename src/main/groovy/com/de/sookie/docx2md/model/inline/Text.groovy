@@ -9,6 +9,5 @@ class Text extends Inline {
     boolean italic
     boolean underline
     boolean strike
-    boolean code
-    boolean inlineCode
+
 }

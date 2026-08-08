@@ -30,6 +30,9 @@ class RunReader implements InlineReader<R> {
     private RunStyle readStyle(R run) {
         def rPr = run.rPr
 
+        /*println "=== RUN STYLE ==="
+        println org.docx4j.XmlUtils.marshaltoString(run, true, true)*/
+
         new RunStyle(
                 fontFamily: rPr?.rFonts?.ascii ?: rPr?.rFonts?.hAnsi,
                 bold: rPr?.b != null,

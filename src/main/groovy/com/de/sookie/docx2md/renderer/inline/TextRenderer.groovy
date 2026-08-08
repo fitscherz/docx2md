@@ -13,13 +13,6 @@ class TextRenderer implements InlineRenderer<Text> {
     void render(StringBuilder md, Text text, boolean codeBlock) {
         String value = text.value
 
-        /*if (!codeBlock && text.code) {
-            md.append("`")
-            md.append(value)
-            md.append("`")
-            return
-        }*/
-
         if (text.bold) {
             value = "**${value}**"
         }

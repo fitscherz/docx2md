@@ -7,7 +7,6 @@ import com.de.sookie.docx2md.model.inline.LineBreak
 import com.de.sookie.docx2md.renderer.inline.InlineRendererService
 
 class ListItemRenderer implements BlockRenderer<ListItem> {
-
     private final BlockRendererService blockRendererService
     private final InlineRendererService inlineRendererService
 
@@ -34,7 +33,6 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
         boolean firstParagraph = true
 
         item.children.each { child ->
-
             if (child instanceof Paragraph) {
                 renderParagraph(md, child, indent, firstParagraph)
                 firstParagraph = false
@@ -73,12 +71,7 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
             md.append("\n")
             md.append(indent)
             md.append("  ")
-            md.append("\n")
-            md.append(indent)
-            md.append("  ")
         }
-
-        boolean afterLineBreak = false
 
         paragraph.inlines.each { inline ->
             if (inline instanceof LineBreak) {
@@ -86,10 +79,10 @@ class ListItemRenderer implements BlockRenderer<ListItem> {
                 md.append("\n")
                 md.append(indent)
                 md.append("  ")
-                afterLineBreak = true
-            } else {
-                inlineRendererService.render(md, inline)
+                return
             }
+
+            inlineRendererService.render(md, inline)
         }
 
         md.append("\n")

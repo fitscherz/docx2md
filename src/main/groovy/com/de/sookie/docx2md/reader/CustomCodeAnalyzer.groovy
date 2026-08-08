@@ -52,10 +52,15 @@ class CustomCodeAnalyzer {
         codeBlock.listLevel = paragraph.listLevel
         codeBlock.type = paragraph.type
 
-        codeBlock.add(new Text(
-                value: code,
-                code: true
-        ))
+        println "CUSTOM CODE:"
+        println "  paragraph.listId=${paragraph.listId}"
+        println "  paragraph.listLevel=${paragraph.listLevel}"
+        println "  paragraph.type=${paragraph.type}"
+        println "  codeBlock.listId=${codeBlock.listId}"
+        println "  codeBlock.listLevel=${codeBlock.listLevel}"
+        println "  codeBlock.type=${codeBlock.type}"
+
+        codeBlock.add(new Text(value: code))
 
         result << codeBlock
 

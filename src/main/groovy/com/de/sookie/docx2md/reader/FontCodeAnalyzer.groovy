@@ -9,133 +9,153 @@ import com.de.sookie.docx2md.model.inline.LineBreak
 import com.de.sookie.docx2md.model.inline.Text
 
 class FontCodeAnalyzer {
-
     void analyze(List<Block> blocks) {
         List<Block> result = []
-
         blocks.each { block ->
             if (!(block instanceof Paragraph)) {
                 result << block
                 return
             }
-
             result.addAll(analyzeParagraph(block))
         }
-
         blocks.clear()
         blocks.addAll(result)
     }
 
     private List<Block> analyzeParagraph(Paragraph paragraph) {
-        List<Block> result = []
-        List<Inline> normal = []
-        List<Inline> code = []
+        List<Inline> normalized = createInlineCode(paragraph.inlines)
+        int codeStart = findMultiLineCodeStart(normalized)
+        if (codeStart < 0) {
+            paragraph.inlines.clear()
+            paragraph.inlines.addAll(normalized)
+            return [paragraph]
+        }
 
-        boolean inCodeSequence = false
+        List<Inline> paragraphInlines = normalized.subList(0, codeStart)
+        List<Inline> codeInlines = normalized.subList(codeStart, normalized.size())
 
-        paragraph.inlines.eachWithIndex { inline, index ->
+        paragraph.inlines.clear()
+        paragraph.inlines.addAll(paragraphInlines)
 
-            if (inline instanceof InlineCode || (inline instanceof Text && inline.code)) {
+        CodeBlock codeBlock = new CodeBlock(
+                listId: paragraph.listId,
+                listLevel: paragraph.listLevel,
+                type: paragraph.type
+        )
+        codeBlock.inlines.addAll(codeInlines)
 
-                boolean hasTextBefore = index > 0 &&
-                        paragraph.inlines[0..<index].any {
-                            it instanceof Text && !it.code
-                        }
+        return [paragraph, codeBlock]
+    }
 
-                boolean hasTextAfter = index + 1 < paragraph.inlines.size() &&
-                        paragraph.inlines[(index + 1)..<paragraph.inlines.size()].any {
-                            it instanceof Text && !it.code
-                        }
+    private int findMultiLineCodeStart(List<Inline> inlines) {
+        for (int i = 0; i < inlines.size(); i++) {
+            if (!(inlines[i] instanceof LineBreak)) {
+                continue
+            }
 
-                if (!hasTextBefore && !hasTextAfter) {
-                    inCodeSequence = true
-                    code << inline
-                    return
+            List<Inline> tail = inlines.subList(i + 1, inlines.size())
+            if (isMultiLineCode(tail)) {
+                return i + 1
+            }
+        }
+
+        return -1
+    }
+
+    private boolean isMultiLineCode(List<Inline> inlines) {
+        int codeLines = 0
+        boolean hasCode = false
+
+        inlines.each { inline ->
+            if (inline instanceof LineBreak) {
+                if (hasCode) {
+                    codeLines++
+                    hasCode = false
                 }
-
-                if (inCodeSequence) {
-                    code << inline
-                    return
-                }
-
-                normal << inline
                 return
             }
 
-            if (inline instanceof LineBreak && inCodeSequence) {
-                code << inline
+            if (inline instanceof InlineCode) {
+                hasCode = true
                 return
             }
 
-            if (inCodeSequence) {
-                result << createCodeBlock(paragraph, code)
-                code.clear()
-                inCodeSequence = false
+            return
+        }
+
+        if (hasCode) {
+            codeLines++
+        }
+
+        return codeLines >= 2 && inlines.every {
+            it instanceof InlineCode || it instanceof LineBreak
+        }
+    }
+
+    private List<Inline> createInlineCode(List<Inline> source) {
+        List<Inline> result = []
+        InlineCode codeBuffer = null
+
+        source.each { inline ->
+            if (isCodeInline(inline)) {
+                if (!codeBuffer) {
+                    codeBuffer = new InlineCode()
+                }
+                codeBuffer.add(copyText(inline))
+                return
             }
 
-            normal << inline
+            if (codeBuffer) {
+                result << codeBuffer
+                codeBuffer = null
+            }
+
+            result << inline
         }
 
-        if (!code.isEmpty()) {
-            result << createCodeBlock(paragraph, code)
-        }
-
-        if (!normal.isEmpty()) {
-            Paragraph copy = copyParagraph(paragraph)
-            copy.inlines.addAll(normal)
-            result.add(0, copy)
+        if (codeBuffer) {
+            result << codeBuffer
         }
 
         return result
     }
 
     private boolean isCodeInline(Inline inline) {
-        if (inline instanceof Text) {
-            return inline.code
+        if (!(inline instanceof Text)) {
+            return false
         }
 
-        return inline instanceof InlineCode
+        return isCodeFont(inline.fontFamily)
     }
 
-    private CodeBlock createCodeBlock(Paragraph source, List<Inline> values) {
-        CodeBlock block = new CodeBlock(
-                language: "sql",
-                listId: source.listId,
-                listLevel: source.listLevel,
-                type: source.type
+    private Text copyText(Text source) {
+        new Text(
+                value: source.value,
+                fontFamily: source.fontFamily,
+                fontSize: source.fontSize,
+                bold: source.bold,
+                italic: source.italic,
+                underline: source.underline,
+                strike: source.strike
         )
-
-        String value = values.collect { inline ->
-            if (inline instanceof Text) {
-                return inline.value
-            }
-
-            if (inline instanceof InlineCode) {
-                return inline.inlines.collect { child ->
-                    child instanceof Text ? child.value : ""
-                }.join("")
-            }
-
-            if (inline instanceof LineBreak) {
-                return "\n"
-            }
-
-            return ""
-        }.join("")
-
-        block.add(new Text(
-                value: value,
-                code: true
-        ))
-
-        return block
     }
 
-    private Paragraph copyParagraph(Paragraph source) {
-        Paragraph p = new Paragraph()
-        p.type = source.type
-        p.listId = source.listId
-        p.listLevel = source.listLevel
-        return p
+    private boolean isCodeFont(String fontFamily) {
+        if (!fontFamily) {
+            return false
+        }
+
+        [
+                "Consolas",
+                "Courier New",
+                "Courier",
+                "Lucida Console",
+                "Monaco",
+                "DejaVu Sans Mono",
+                "Fira Code",
+                "JetBrains Mono"
+        ].any {
+            it.equalsIgnoreCase(fontFamily)
+        }
     }
 }

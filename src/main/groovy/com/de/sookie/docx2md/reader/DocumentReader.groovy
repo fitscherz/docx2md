@@ -3,7 +3,6 @@ package com.de.sookie.docx2md.reader
 import com.de.sookie.docx2md.model.Block
 import com.de.sookie.docx2md.model.CodeBlock
 import com.de.sookie.docx2md.model.Document
-import com.de.sookie.docx2md.model.InlineBlock
 import com.de.sookie.docx2md.model.ListItem
 import com.de.sookie.docx2md.model.Paragraph
 import com.de.sookie.docx2md.model.inline.Text
@@ -54,14 +53,14 @@ class DocumentReader {
             }
         }
 
-        println "=== BEFORE CODE ANALYZER ==="
+        println "=== BEFORE CUSTOMCODE ANALYZER ==="
         document.blocks.each { block ->
             if (block instanceof Paragraph) {
                 println "PARAGRAPH"
 
                 block.inlines.each {
                     if (it instanceof Text) {
-                        println "TEXT='${it.value}' FONT=${it.fontFamily} CODE=${it.code}"
+                        println "TEXT='${it.value}' FONT=${it.fontFamily}"
                     } else {
                         println it.class.simpleName
                     }
@@ -69,81 +68,21 @@ class DocumentReader {
             }
         }
 
-        /*
-         * Code-Erkennung
-         *
-         * 1. Custom Marker:
-         *    [CODE]
-         *    [CODE:sql]
-         *
-         * 2. Font-Erkennung:
-         *    Consolas, Courier usw.
-         */
         customCodeAnalyzer.analyze(document.blocks)
+        println "=== AFTER CUSTOMCODE ANALYZER ==="
+        dumpInlineBlocks(document.blocks)
+
         fontCodeAnalyzer.analyze(document.blocks)
-
-        println "=== AFTER CODE ANALYZER ==="
-
-        document.blocks.eachWithIndex { block, index ->
-            println "${index}: ${block.class.simpleName}"
-
-            if (block instanceof Paragraph || block instanceof CodeBlock) {
-                println "type=${block.type} listId=${block.listId} level=${block.listLevel}"
-
-                block.inlines.each { inline ->
-                    if (inline instanceof Text) {
-                        println "  Text: '${inline.value}' code=${inline.code}"
-                    } else {
-                        println "  ${inline.class.simpleName}: ${inline}"
-                    }
-                }
-            }
-        }
+        println "=== AFTER FONTCODE ANALYZER ==="
+        dumpInlineBlocks(document.blocks)
 
         println "=== BEFORE NORMALIZER ==="
-
-        document.blocks.eachWithIndex { block, index ->
-            println "${index}: ${block.class.simpleName}"
-
-            if (block instanceof Paragraph || block instanceof CodeBlock) {
-                println "type=${block.type} listId=${block.listId} level=${block.listLevel}"
-
-                block.inlines.each { inline ->
-                    if (inline instanceof Text) {
-                        println "  Text: '${inline.value}' code=${inline.code}"
-                    } else {
-                        println "  ${inline.class.simpleName}: ${inline}"
-                    }
-                }
-            }
-        }
-
+        dumpInlineBlocks(document.blocks)
         listNormalizer.normalize(document.blocks)
-
         println "=== AFTER NORMALIZER ==="
-
-        document.blocks.eachWithIndex { block, index ->
-            println "${index}: ${block.class.simpleName}"
-
-            if (block instanceof Paragraph || block instanceof CodeBlock) {
-                println "type=${block.type} listId=${block.listId} level=${block.listLevel}"
-
-                block.inlines.each { inline ->
-                    if (inline instanceof Text) {
-                        println "  Text: '${inline.value}' code=${inline.code}"
-                    } else {
-                        println "  ${inline.class.simpleName}: ${inline}"
-                    }
-                }
-            }
-
-            if (block instanceof CodeBlock) {
-                println "CodeBlock listId=${block.listId} level=${block.listLevel}"
-            }
-        }
+        dumpInlineBlocks(document.blocks)
 
         println "=== BEFORE LIST BUILDER ==="
-
         document.blocks.eachWithIndex { block, index ->
             println "${index}: ${block.class.simpleName}"
 
@@ -161,6 +100,24 @@ class DocumentReader {
         document.blocks.addAll(structured)
 
         return document
+    }
+
+    private void dumpInlineBlocks(List<Block> blocks) {
+        blocks.eachWithIndex { block, index ->
+            println "${index}: ${block.class.simpleName}"
+
+            if (block instanceof Paragraph || block instanceof CodeBlock) {
+                println "type=${block.type} listId=${block.listId} level=${block.listLevel}"
+
+                block.inlines.each { inline ->
+                    if (inline instanceof Text) {
+                        println "  Text: '${inline.value}'"
+                    } else {
+                        println "  ${inline.class.simpleName}: ${inline}"
+                    }
+                }
+            }
+        }
     }
 
     private void dumpBlocks(List<Block> blocks, String indent = "") {
